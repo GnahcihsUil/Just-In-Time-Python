@@ -14,7 +14,7 @@ Basically, Numba add type to each of the variables to get the acceleration.
 
 Numba @jit decorator call the compiler with `numba.compiler.compile_extra()` function.
 
-###### Stage 1: 分析bytecode
+###### Stage 1: Analyze bytecode
 
 Control flow generation, dataflow analysis.
 
@@ -42,7 +42,54 @@ Give type to each IR variables. Types comes from 1) the type said in @jit(xxx); 
 
 Input: Numba IR
 
-Output: types Numba IR
+Output: typed Numba IR
 
+Unsupported type will be marked as default type `pyobject` and will fall-back to object mode.
 
+###### Stage 5a: Rewrite typed IR
 
+Apply any high-level optimization that may benefit from the Numba IR type info.
+
+As later optimization could be hard (ex. array op). Ex. loop fusion and shortcut deforestation
+
+Input: typed Numba IR
+
+Output: Optimized types Numba IR
+
+###### Stage 5b: Automatic Parallelization
+
+Extract the implicit parallelization in the ops and replace with explicit `parfor` operation; then combine consecutive `parfor` to single `parfor`.
+
+auto parallelization have many sub passes:
+
+1) CFG simplification: chains of blocks without loop -> single blocks (???)
+2) Numpy canonicalization: different numpy calls to the same function -> the same way (ex. arr.sum() -> numpy.sum(arr))
+3) array analysis: make sure the size and type for `parfor` operations are matched, prepare for later parfor fusion.
+4) `prange()` -> `parfor`: explicitly marked parallelizable loop with `prange`-> `parfor`.
+5) numpy -> `parfor`: Some functions in Numpy (ex. zeros, ones, dot) and random number generators -> `parfor`.
+6) Setitem to `parfor`: range value assignment ->`parfor`. 
+7) Simplification: copy propagation and dead code elimation pass.
+8) Fusion：reorder instructions in a block, so that `parfor`s are closer and can be fused better; loop until no `parfor` can be fused.
+9) push call objs and compute parfor params: parameters for `parfor`.
+
+###### Stage 6a: Generate LLVM IR
+
+Lowering process: generate native code. Call `llvmlite to get LLVM IR and optimize with LLVM toolchain.
+
+Input: Numba IR
+
+Output: LLVM IR
+
+###### Stage 6b: Generate object mode LLVM IR
+
+If typing failed and func is compiled in object mode: wll get longer LLVL IR, as almost all operations need to call Python C API.
+
+Loop-lifting (???)
+
+###### Stage 7: LLVM IR -> machine code
+
+call LLVM JIT. 
+
+Input: LLVM IR
+
+Output: machine code and dynamic dispatcher.
