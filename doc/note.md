@@ -8,7 +8,13 @@ Basically, Numba add type to each of the variables to get the acceleration.
 
 ##### What Numba has
 
+- object mode: code still manipulate Python object, but with type information (not much faster than Python)
+- nopython mode: code compiled for specific data type, not rely on Python Object (much faster than Python)
 
+##### Compiler Architecture
+
+- Numba IR: a intermediate representation for Numba
+- LLVM: Numba use LLVM to compile IR into machine code
 
 ##### Compiler Stages
 
