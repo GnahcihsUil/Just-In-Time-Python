@@ -99,3 +99,21 @@ call LLVM JIT.
 Input: LLVM IR
 
 Output: machine code and dynamic dispatcher.
+
+##### Polymorphic dispatching (runtime)
+
+- Dispatcher: a function that dispatches to the right implementation based on the types of the arguments.
+
+- multiple dispatch
+
+- two steps:
+  
+  1. infer **numba type**
+     1. cannot simply lookup an object’s class and key a dictionary with it to obtain the corresponding Numba type.
+     2. based on its Python type, query various properties to infer the appropriate Numba type
+     - **typecode**: a unique integer for each Numba type
+       - Hard-coded fast paths: for some important types, the typecode is hard-coded in the dispatcher.
+       - Fingerprint-based typecode cache: For non-so-trivial types
+         -  a simple bytestring, a low-level possible denotation of that Numba type: a fingerprint
+         -  a cache mapping fingerprints to typecodes.
+  2. select  specialization (or compile a new one)
