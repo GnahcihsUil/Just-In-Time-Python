@@ -117,3 +117,13 @@ Output: machine code and dynamic dispatcher.
          -  a simple bytestring, a low-level possible denotation of that Numba type: a fingerprint
          -  a cache mapping fingerprints to typecodes.
   2. select  specialization (or compile a new one)
+      - select the specialization with the closest matching signature
+      - loop over all the specializations and find the one with the closest matching signature
+      - compability:
+        - if convert is allowed
+        - semantic cost of conversion
+      - best match:
+        - `(number of unsafe conversions, number of safe conversions, number of same-kind promotions, number of exact matches) `
+
+##### Generators
+- 
