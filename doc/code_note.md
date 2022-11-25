@@ -35,14 +35,54 @@ LiteralUnroll：？找赋值时是否有值为literal_unroll的赋值；没有�
 
 ReconstructSSA：SSA-静态单赋值形式（每个var仅被赋值一次的IR），生成SSA，并且是minimal SSA（Choi et, al.）
 
+LiteralPropagationSubPipelinePass：直接return了；否则会做partial type inference, literal value propagation, smantic rewrite和dead branch prune.
+
+NoPythonTypeInference：？？？
+
+PreLowerStripPhis：去除SSA引入的PHI nodes（ir.Expr.phi）转化为没有phi的正常表示，需要在lowering之前去掉Phi因为numba和LLVM的Phi nodes长得不一样，numba IR中的phi nodes可能会被转化成多个LLVM指令（那为什么还要先搞出来phi nodes再删掉？为什么不一步到位？）
+
+**Phi Nodes**: LLVM IR中的一个表达式，用于将IR转化为SSA形式，可以方便地用于条件跳转。如果pc从%then调过来我们就返回calltmp的值，如果从%else跳过来就返回calltmp1的值：必须这样做因为是SSA形式。
+
+https://stackoverflow.com/questions/11485531/what-exactly-phi-instruction-does-and-how-to-use-it-in-llvm
+
+![image-20221124100439481](C:\Users\adali\AppData\Roaming\Typora\typora-user-images\image-20221124100439481.png)
+
+
+
+InlineOverloads：如果装饰器inline = True的话，就把一个numba.extending.overload装饰器包裹的function直接插入到caller中。（此处可以在pass代码中设_DEBUG=True来看看到底干了啥）
+
+
+
+NopythonRewrites：
+
+执行所有after-inference的IR rewrites。
+
 'after-inference': 
 
 - RewriteStringLiteralGetitems: getitem(value=arr, index=\$XX) -> static_getitem(value=arr, index=\<literal value\>) (\$XX是一个string literal)
 - RewriteStringLiteralSetitems: setitem(value=arr, index=\$XX) -> static_setitem(value=arr, index=\<literal value\>) (\$XX是一个string literal)
+- RewriteArrayExprs：找到IR中的array exprs也就是**在array上的elementwise操作**（这里需要typing信息），替换为一个单个的operation，该operation后面会被拓展为类似一个ufunc call的东西。（再仔细看一下，可以展开讲）
+- RewriteArrayOfConsts：找到从constant list创建的1D array，然后重写为array elements的初始化（而不必创建那个list）（？）
 
-<class 'numba.np.ufunc.array_exprs.RewriteArrayExprs'>,
 
-<class 'numba.core.inline_closurecall.RewriteArrayOfConsts'>]
+
+NoPythonSupportedFeatureValidation：验证IR是一种supported的格式
+
+IRLegalization：把IR legalize（具体来说，保证没有任何phi nodes和del，然后再把del加回去）
+
+AnnotateTypes：在IR中增加type annotation，格式是var = value :: type
+
+
+
+NativeLowering：lowering是将高层指令转化为底层指令的过程。native lowering就是转化为机器码的过程？这个pss把function分解为block再分解为instruction。（？lowering.py）
+
+
+
+NoPythonBackend：用numba IR生成LLVM IR，编译为machine code
+
+
+
+DumpParforDiagnostics：打印parfor要用的诊断信息
 
 
 
