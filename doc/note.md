@@ -125,5 +125,8 @@ Output: machine code and dynamic dispatcher.
       - best match:
         - `(number of unsafe conversions, number of safe conversions, number of same-kind promotions, number of exact matches) `
 
-##### Generators
-- 
+##### Extension
+1. typing
+   1. type inference is assigning numba types to variables to enable code generation
+2. lowering
+   1. convert high-level Python operations into low-level LLVM operations (using the type information from the typing stage)
