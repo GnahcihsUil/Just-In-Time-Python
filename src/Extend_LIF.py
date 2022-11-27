@@ -1,21 +1,12 @@
+from input import const_input
 import time
+import ctypes
 from numba.extending import box
 from numba.extending import unbox, NativeValue
 from numba.core import cgutils
 from numba.extending import lower_builtin
 import numpy as np
-
-class LIF:
-    '''
-    LIF neuron model: (dV/dt) = - (V - (V_rest + stim * R)) / tau
-    '''
-    def __init__(self, V_rest = -70., V_reset = -70., V_th = -55., R = 1., tau = 10.):
-        self.V_rest = V_rest
-        self.V_reset = V_reset
-        self.V_th = V_th
-        self.R = R
-        self.tau = tau
-
+from LIF import LIF
 from numba import types
 from numba.extending import typeof_impl, as_numba_type, type_callable, models, register_model, make_attribute_wrapper
 from numba import jit
@@ -108,9 +99,6 @@ def box_lif(typ, val, c):
     return lif_obj
 
 
-
-from input import const_input
-
 @jit(nopython=True)
 def LIF_simulate():
     # LIF params
@@ -121,15 +109,15 @@ def LIF_simulate():
     tau = 10.       # time const in ms
 
     # record value in list
-    simu_time = 1000 # simulation time in ms
+    simu_time = 1000  # simulation time in ms
     ts = 0.01       # time step in ms
 
     epochs = int(simu_time // ts + 1)
     stim_list = np.array([20.0] * epochs)
-    
+
     #stim_list = np.array([20.] * 1000 + [0.] * 9000)
     # list of input, change with different input waveform
-    neu = LIF(V_rest = V_rest, V_reset = V_reset, V_th = V_th, R = R, tau = tau)
+    neu = LIF(V_rest=V_rest, V_reset=V_reset, V_th=V_th, R=R, tau=tau)
 
     t_list = []
     V_list = []
@@ -164,15 +152,15 @@ def LIF_simulate_py():
     tau = 10.       # time const in ms
 
     # record value in list
-    simu_time = 1000 # simulation time in ms
+    simu_time = 1000  # simulation time in ms
     ts = 0.01       # time step in ms
 
     epochs = int(simu_time // ts + 1)
     stim_list = np.array([20.0] * epochs)
-    
+
     #stim_list = np.array([20.] * 1000 + [0.] * 9000)
     # list of input, change with different input waveform
-    neu = LIF(V_rest = V_rest, V_reset = V_reset, V_th = V_th, R = R, tau = tau)
+    neu = LIF(V_rest=V_rest, V_reset=V_reset, V_th=V_th, R=R, tau=tau)
 
     t_list = []
     V_list = []
@@ -198,7 +186,48 @@ def LIF_simulate_py():
         last_spike_t_list.append(last_spike_t)
 
 
+class Simulate:
+    def LIF_simulate(self):
+        raise NotImplementedError
+
+    def __call__(self):
+        st = time.time()
+        n = 100
+        for _ in range(n):
+            self.LIF_simulate()
+        print(f"{type(self).__name__} took {(time.time() - st)/n}")
+
+
+class SimulateNumba(Simulate):
+    def LIF_simulate(self):
+        return LIF_simulate()
+
+
+class SimulatePython(Simulate):
+    def LIF_simulate(self):
+        return LIF_simulate_py()
+
+
+class SimulateCpp(Simulate):
+    def __init__(self) -> None:
+        lib = ctypes.cdll.LoadLibrary("./src/LIF.so")
+        fun = lib.LIF_simulate
+        fun.restype = None
+        fun.argtypes = None
+        self.fun = fun
+
+    def LIF_simulate(self):
+        self.fun()
+
+    # def LIF_simulate(self):
+    #     return LIF_simulate_cpp()
+
+
 if __name__ == '__main__':
+    simulate_types = [SimulateNumba(), SimulatePython(), SimulateCpp()]
+    for simulate_type in simulate_types:
+        simulate_type()
+        
     st = time.time()
     for i in range(100):
         LIF_simulate()
@@ -208,4 +237,4 @@ if __name__ == '__main__':
     for i in range(100):
         LIF_simulate_py()
     print(time.time() - st)
-    #LIF_simulate()
+    # LIF_simulate()
