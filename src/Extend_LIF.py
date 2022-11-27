@@ -210,7 +210,7 @@ class SimulatePython(Simulate):
 
 class SimulateCpp(Simulate):
     def __init__(self) -> None:
-        lib = ctypes.cdll.LoadLibrary("./src/LIF.so")
+        lib = ctypes.cdll.LoadLibrary("./src/LIF_gcc_o3.so")
         fun = lib.LIF_simulate
         fun.restype = None
         fun.argtypes = None
