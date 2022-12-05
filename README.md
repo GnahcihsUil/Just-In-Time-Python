@@ -19,7 +19,7 @@ numba
 
 ### Environment
 
-We only test it on Windows WSL. Hopefully, it should work on any X86_64 architechture.  Unfortunately, it does not work on ARM64 architechture (M1 Mac).
+We only test it on Windows WSL. Hopefully, it should work on any X86_64 architecture.  Unfortunately, it does not work on ARM64 architecture (M1 Mac).
 
 our test environment:
 ```
