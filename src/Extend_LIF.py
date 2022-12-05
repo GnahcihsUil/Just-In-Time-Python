@@ -225,7 +225,7 @@ class SimulatePython(Simulate):
 
 class SimulateCpp(Simulate):
     def __init__(self) -> None:
-        lib = ctypes.cdll.LoadLibrary("./src/LIF_gcc_o3.so")
+        lib = ctypes.cdll.LoadLibrary("./src/LIF_gcc_O.so")
         fun = lib.LIF_simulate
         fun.restype = None
         fun.argtypes = None
@@ -243,13 +243,13 @@ if __name__ == '__main__':
     for simulate_type in simulate_types:
         simulate_type()
         
-    st = time.time()
-    for i in range(100):
-        LIF_simulate()
-    print(time.time() - st)
+    # st = time.time()
+    # for i in range(100):
+    #     LIF_simulate()
+    # print(time.time() - st)
 
-    st = time.time()
-    for i in range(100):
-        LIF_simulate_py()
-    print(time.time() - st)
+    # st = time.time()
+    # for i in range(100):
+    #     LIF_simulate_py()
+    # print(time.time() - st)
     # LIF_simulate()
