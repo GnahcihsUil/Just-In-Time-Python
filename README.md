@@ -2,10 +2,40 @@
 
 CS263 Team
 
-Member: Xinyu Liu, Shichang Liu
+## JIT in Python: Investigate and Extend Numba
 
-## JIT in Python
+Numba is a Just-In-Time (JIT) compiler for Python which excels in accelerating the widely used numerical computation library Numpy. In this project, we investigate Numba and extend it by adding a new supported type. However, instead of implementing a JIT compiler from scratch, Numba chose to convert Python bytecode to LLVM IR, and import the JIT compiler given by the LLVM toolchain to translate that LLVM IR to machine code. 
 
-PyPy or Numba
+We investigate the source code of Numba to provide: 1, an overview of the stages of transferring native python byte code to LLVM Intermediate Representation (IR); 2, detailed investigation and explanation into type inference mechanism, before/after inference rewrites, phi node generation. Besides, we conducted an implementation part to extend Numba for the support of a new type.
 
-This project aims at investigating and extending the Just-In-Time (JIT) compiler PyPy of Python / Numba of Numpy. The JIT compiler helps accelerate the compilation and execution of Python / Numpy, by translating the bottleneck Python code directly into machine code (instead of byte code). We plan to study how to use JIT, why JIT makes Python faster, and the implementation of JIT. And if time permits, we will possibly compare JIT in PyPy and Numba, and extend one or two new features into Pypy.
+
+## Steps for building/deploying project
+
+### Required Packages
+```
+numpy
+numba
+```
+
+### Environment
+
+We only test it on Windows WSL. Hopefully, it should work on any X86_64 architechture.  Unfortunately, it does not work on ARM64 architechture (M1 Mac).
+
+our test environment:
+```
+Unbuntu 20.04.3 LTS
+python 3.8.10
+numba 0.56.4
+```
+### Run Extend_LIF
+```
+cd Just-In-Time-Python
+python3 src/Extend_LIF.py
+```
+
+### Alternative
+Manually compile C++ file to use different compiler or optimization level, for example:
+```
+g++ -O3 -shared -0 src/LIF_gcc_o.so src/LIF_cpp.cpp
+```
+
