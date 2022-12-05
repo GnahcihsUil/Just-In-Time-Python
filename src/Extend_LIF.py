@@ -6,12 +6,27 @@ from numba.extending import unbox, NativeValue
 from numba.core import cgutils
 from numba.extending import lower_builtin
 import numpy as np
-from LIF import LIF
 from numba import types
 from numba.extending import typeof_impl, as_numba_type, type_callable, models, register_model, make_attribute_wrapper
 from numba import jit
 
 
+'''
+LIF neuron model: (dV/dt) = - (V - (V_rest + stim * R)) / tau
+'''
+
+class LIF:
+    '''
+    LIF neuron model: (dV/dt) = - (V - (V_rest + stim * R)) / tau
+    '''
+    def __init__(self, V_rest = -70., V_reset = -70., V_th = -55., R = 1., tau = 10.):
+        self.V_rest = V_rest
+        self.V_reset = V_reset
+        self.V_th = V_th
+        self.R = R
+        self.tau = tau
+
+        
 class LIFType(types.Type):
     def __init__(self):
         super(LIFType, self).__init__(name='LIF')
