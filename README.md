@@ -36,6 +36,6 @@ python3 src/Extend_LIF.py
 ### Alternative
 Manually compile C++ file to use different compiler or optimization level, for example:
 ```
-g++ -O3 -shared -0 src/LIF_gcc_o.so src/LIF_cpp.cpp
+g++ -O3 -shared -o src/LIF_gcc_o.so src/LIF_cpp.cpp
 ```
 
